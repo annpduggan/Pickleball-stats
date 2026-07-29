@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Counter">
+<title>Counter</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  .screen {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 24px;
+  }
+  .label {
+    color: #94a3b8;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .count {
+    color: white;
+    font-size: 88px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .tap-btn {
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: #10b981;
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.35);
+    transition: transform 0.08s ease, background 0.08s ease;
+  }
+  .tap-btn:active {
+    background: #059669;
+    transform: scale(0.95);
+  }
+  .reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 16px;
+    padding: 10px 16px;
+    transition: color 0.15s ease;
+  }
+  .reset-btn:active {
+    color: #e2e8f0;
+  }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <div>
+      <div class="label">Counter</div>
+      <div class="count" id="count">0</div>
+    </div>
+    <button class="tap-btn" id="tapBtn">Tap</button>
+    <button class="reset-btn" id="resetBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="1 4 1 10 7 10"></polyline>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+      </svg>
+      Reset
+    </button>
+  </div>
+
+  <script>
+    let count = 0;
+    const countEl = document.getElementById('count');
+    const tapBtn = document.getElementById('tapBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    tapBtn.addEventListener('click', () => {
+      count++;
+      countEl.textContent = count;
+    });
+
+    resetBtn.addEventListener('click', () => {
+      count = 0;
+      countEl.textContent = count;
+    });
+  </script>
+</body>
+</html>

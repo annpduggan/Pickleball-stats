@@ -5,105 +5,707 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Counter">
-<title>Counter</title>
+<meta name="apple-mobile-web-app-title" content="Depth">
+<title>Pickleball — Serve &amp; Return Depth</title>
 <style>
+  :root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255, 255, 255, 0.10);
+    --series-1:       #3987e5;  /* team A — categorical slot 1 */
+    --series-2:       #d95926;  /* team B — categorical slot 2 */
+    --good:           #0ca30c;  /* status: always paired with a label */
+    --meter-track:    #0d366b;  /* blue ramp step 700 — same ramp as the fill */
+    --meter-fill:     #3987e5;  /* blue ramp step 400 */
+  }
+
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
   html, body {
-    margin: 0; padding: 0; height: 100%;
-    background: #0f172a;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow: hidden;
+    margin: 0; padding: 0;
+    min-height: 100%;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
     user-select: none;
   }
-  .screen {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 40px;
-    padding: 24px;
+
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 16px 16px 40px;
   }
-  .label {
-    color: #94a3b8;
-    font-size: 13px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    text-align: center;
-    margin-bottom: 8px;
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
   }
-  .count {
-    color: white;
-    font-size: 88px;
-    font-weight: 700;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-  .tap-btn {
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    background: #10b981;
-    border: none;
-    color: white;
-    font-size: 24px;
-    font-weight: 600;
-    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.35);
-    transition: transform 0.08s ease, background 0.08s ease;
-  }
-  .tap-btn:active {
-    background: #059669;
-    transform: scale(0.95);
-  }
-  .reset-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: none;
-    border: none;
-    color: #94a3b8;
+
+  h1 { font-size: 19px; font-weight: 600; margin: 4px 0 16px; }
+  h2 { font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+       color: var(--text-muted); margin: 0 0 12px; }
+  h3 { font-size: 14px; font-weight: 600; margin: 0 0 8px; color: var(--text-secondary); }
+
+  label { display: block; font-size: 12px; color: var(--text-muted); margin: 10px 0 4px; }
+
+  input[type="text"], select {
+    width: 100%;
+    background: var(--page);
+    border: 1px solid var(--baseline);
+    border-radius: 8px;
+    color: var(--text-primary);
     font-size: 16px;
-    padding: 10px 16px;
-    transition: color 0.15s ease;
+    font-family: inherit;
+    padding: 10px 12px;
   }
-  .reset-btn:active {
-    color: #e2e8f0;
+  input[type="text"]:focus, select:focus { outline: 2px solid var(--series-1); outline-offset: -1px; }
+
+  .chip { display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+          margin-right: 7px; vertical-align: baseline; }
+  .chip-a { background: var(--series-1); }
+  .chip-b { background: var(--series-2); }
+
+  /* ---- hero score call ---- */
+  .call {
+    text-align: center;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin: 4px 0 2px;
   }
+  .call-key { text-align: center; font-size: 11px; letter-spacing: 1.5px;
+              text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+
+  .teamline { display: flex; justify-content: space-between; align-items: center;
+              padding: 7px 0; border-top: 1px solid var(--gridline); font-size: 15px; }
+  .teamline .pts { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .teamline.tracked .who::after {
+    content: "tracked"; margin-left: 8px; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-muted);
+    border: 1px solid var(--baseline); border-radius: 4px; padding: 1px 5px;
+  }
+
+  .who-serves { font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+                margin-top: 14px; }
+  .who-serves strong { color: var(--text-primary); font-weight: 600; }
+
+  /* ---- buttons ---- */
+  .btnrow { display: flex; gap: 8px; }
+  .opt {
+    flex: 1;
+    background: var(--page);
+    border: 1px solid var(--baseline);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 16px 4px;
+  }
+  .opt[aria-pressed="true"] { border-color: var(--good); color: var(--text-primary);
+                              box-shadow: inset 0 0 0 1px var(--good); }
+  .opt[aria-pressed="true"].neutral { border-color: var(--text-secondary);
+                                      box-shadow: inset 0 0 0 1px var(--text-secondary); }
+
+  .rally {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 22px 8px;
+    line-height: 1.3;
+  }
+  .rally-a { background: var(--series-1); }
+  .rally-b { background: var(--series-2); }
+  /* step 2's card dims as a whole when it isn't your turn, so the buttons
+     themselves stay legible rather than double-dimming into the background */
+  .rally:disabled { opacity: 1; }
+
+  .ghost {
+    background: none; border: 1px solid var(--baseline); border-radius: 10px;
+    color: var(--text-secondary); font-family: inherit; font-size: 14px; padding: 11px 14px;
+  }
+  .ghost:disabled { opacity: 0.35; }
+
+  .primary {
+    width: 100%; border: none; border-radius: 12px; background: var(--series-1);
+    color: #fff; font-family: inherit; font-size: 16px; font-weight: 600; padding: 16px;
+  }
+  .primary:disabled { opacity: 0.35; }
+
+  .hint { font-size: 12px; color: var(--text-muted); margin: 10px 0 0; line-height: 1.5; }
+
+  /* ---- two-step flow ---- */
+  .step-card { transition: opacity .15s ease, border-color .15s ease; }
+  .step-card.idle { opacity: 0.5; }
+  .step-card.active { border-color: var(--series-1); }
+
+  .step-head { display: flex; align-items: center; justify-content: space-between;
+               gap: 10px; margin-bottom: 12px; }
+  .step-head h2 { margin: 0; display: flex; align-items: center; }
+  .stepnum { display: inline-flex; align-items: center; justify-content: center;
+             width: 20px; height: 20px; border-radius: 50%; flex: none;
+             background: var(--baseline); color: var(--text-secondary);
+             font-size: 11px; font-weight: 700; letter-spacing: 0; margin-right: 8px; }
+  .step-card.active .stepnum { background: var(--series-1); color: #fff; }
+  .step-state { font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+                color: var(--text-muted); white-space: nowrap; }
+  .step-card.active .step-state { color: var(--series-1); }
+  .step-card.done .step-state { color: var(--good); }
+
+  .autorow { margin-top: 8px; }
+  .opt small, .rally small { display: block; font-size: 10px; font-weight: 600;
+                             letter-spacing: 1px; text-transform: uppercase;
+                             margin-bottom: 4px; }
+  .opt small { color: var(--text-muted); }
+  .rally small { opacity: 0.85; }
+  .opt.auto { font-size: 14px; padding: 12px 4px; }
+
+  .last { font-size: 12px; color: var(--text-muted); text-align: center;
+          margin: 0 0 12px; min-height: 15px; line-height: 1.3; }
+
+  .banner { text-align: center; padding: 14px; border-radius: 10px;
+            border: 1px solid var(--good); color: var(--text-primary);
+            font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+
+  /* ---- stats ---- */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 6px 4px; font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+             color: var(--text-muted); font-weight: 600;
+             border-bottom: 1px solid var(--baseline); }
+  tbody td { border-bottom: 1px solid var(--gridline); }
+  tr.group td { padding-top: 14px; font-weight: 600; color: var(--text-primary);
+                font-size: 13px; border-bottom: 1px solid var(--baseline); }
+  tr.total td { color: var(--text-primary); font-weight: 600; }
+  td.dim { color: var(--text-muted); }
+
+  .meter { display: block; width: 46px; height: 5px; border-radius: 3px;
+           background: var(--meter-track); overflow: hidden; margin-left: auto; margin-top: 3px; }
+  .meter i { display: block; height: 100%; border-radius: 3px; background: var(--meter-fill); }
+
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
-  <div class="screen">
-    <div>
-      <div class="label">Counter</div>
-      <div class="count" id="count">0</div>
+<div class="wrap">
+
+  <!-- ============ SETUP ============ -->
+  <section id="setup">
+    <h1>Serve &amp; return depth — doubles</h1>
+
+    <div class="card">
+      <h2><span class="chip chip-a"></span>Team 1</h2>
+      <label for="aName">Team name</label>
+      <input type="text" id="aName" value="Team 1" autocomplete="off">
+      <label for="a0">Player starting on the right (even court)</label>
+      <input type="text" id="a0" placeholder="Name" autocomplete="off">
+      <label for="a1">Player starting on the left (odd court)</label>
+      <input type="text" id="a1" placeholder="Name" autocomplete="off">
     </div>
-    <button class="tap-btn" id="tapBtn">Tap</button>
-    <button class="reset-btn" id="resetBtn">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="1 4 1 10 7 10"></polyline>
-        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-      </svg>
-      Reset
-    </button>
-  </div>
 
-  <script>
-    let count = 0;
-    const countEl = document.getElementById('count');
-    const tapBtn = document.getElementById('tapBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    <div class="card">
+      <h2><span class="chip chip-b"></span>Team 2</h2>
+      <label for="bName">Team name</label>
+      <input type="text" id="bName" value="Team 2" autocomplete="off">
+      <label for="b0">Player starting on the right (even court)</label>
+      <input type="text" id="b0" placeholder="Name" autocomplete="off">
+      <label for="b1">Player starting on the left (odd court)</label>
+      <input type="text" id="b1" placeholder="Name" autocomplete="off">
+    </div>
 
-    tapBtn.addEventListener('click', () => {
-      count++;
-      countEl.textContent = count;
+    <div class="card">
+      <h2>Game</h2>
+      <label for="trackSel">Track stats for</label>
+      <select id="trackSel"><option value="A">Team 1</option><option value="B">Team 2</option></select>
+      <label for="serveSel">Serves first</label>
+      <select id="serveSel"><option value="A">Team 1</option><option value="B">Team 2</option></select>
+      <label for="targetSel">Play to</label>
+      <select id="targetSel">
+        <option value="11">11, win by 2</option>
+        <option value="15">15, win by 2</option>
+        <option value="21">21, win by 2</option>
+      </select>
+      <p class="hint">Starting sides matter — the app uses them to work out who serves and from
+        where. Nothing is saved; refreshing starts a new game.</p>
+    </div>
+
+    <button class="primary" id="startBtn" disabled>Start game</button>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="game" class="hidden">
+    <div id="winBanner" class="banner hidden"></div>
+
+    <div class="card">
+      <div class="call" id="call">0 – 0 – 2</div>
+      <div class="call-key" id="callKey">serving · receiving · server</div>
+      <div class="teamline" id="lineA"></div>
+      <div class="teamline" id="lineB"></div>
+      <div class="who-serves" id="whoServes"></div>
+    </div>
+
+    <p class="last" id="lastRally"></p>
+
+    <div class="card step-card" id="depthCard">
+      <div class="step-head">
+        <h2><span class="stepnum">1</span><span id="depthTitle">Your serve</span></h2>
+        <span class="step-state" id="depthState">Tap one</span>
+      </div>
+      <div class="btnrow" id="depthRow"></div>
+      <div class="btnrow autorow" id="autoRow"></div>
+      <p class="hint" id="depthHint"></p>
+    </div>
+
+    <div class="card step-card" id="winCard">
+      <div class="step-head">
+        <h2><span class="stepnum">2</span>Who won the rally?</h2>
+        <span class="step-state" id="winState">Waiting</span>
+      </div>
+      <div class="btnrow">
+        <button class="rally rally-a" id="wonA" disabled></button>
+        <button class="rally rally-b" id="wonB" disabled></button>
+      </div>
+      <p class="hint" id="winHint"></p>
+    </div>
+
+    <div class="btnrow" style="margin-bottom:12px">
+      <button class="ghost" id="undoBtn" disabled>Undo last rally</button>
+      <button class="ghost" id="statsBtn">Show stats</button>
+    </div>
+
+    <div id="statsPanel" class="hidden"></div>
+
+    <button class="ghost" id="newBtn" style="width:100%">New game</button>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------------------------------------------------------------
+   State
+   --------------------------------------------------------------- */
+
+/*
+  Depth buttons. Two kinds:
+    - plain    : logs the depth, then you pick who won the rally (step 2)
+    - auto     : the depth *is* the outcome, so the rally is recorded on the spot.
+                 `auto` is who wins — "us" = the tracked team, "opp" = the others.
+
+  `depth` is the stats bucket, or null for events that aren't ours to log
+  (their serve going out isn't a return we made).
+*/
+const DEPTH_OPTS = {
+  serve: [
+    { id: "deep",  label: "Deep",  depth: "deep"  },
+    { id: "short", label: "Short", depth: "short" },
+    { id: "fault", label: "Fault", depth: "other", auto: "opp", sub: "Rally over" }
+  ],
+  return: [
+    { id: "deep",  label: "Deep",  depth: "deep"  },
+    { id: "short", label: "Short", depth: "short" },
+    { id: "rout",  label: "Return out", depth: "other", auto: "opp", sub: "Rally over" },
+    { id: "sout",  label: "Serve was out", depth: null, auto: "us", sub: "Rally over" }
+  ]
+};
+
+// Row labels for the stats tables, keyed by bucket.
+const BUCKETS = {
+  serve:  [["deep", "Deep"], ["short", "Short"], ["other", "Fault"]],
+  return: [["deep", "Deep"], ["short", "Short"], ["other", "Return out"]]
+};
+
+let S = null;
+
+function newState(cfg) {
+  return {
+    names: cfg.names,                       // { A: 'Team 1', B: 'Team 2' }
+    roster: cfg.roster,                     // { A: [{id,name},{id,name}], B: [...] }
+    positions: { A: ["A0", "A1"], B: ["B0", "B1"] },  // [rightCourt, leftCourt]
+    score: { A: 0, B: 0 },
+    servingTeam: cfg.first,
+    serverNum: 2,        // the "0-0-2" convention: first service turn gets one server
+    serverIdx: 0,        // right/even court
+    tracked: cfg.tracked,
+    target: cfg.target,
+    winBy: 2,
+    rallies: [],
+    history: [],
+    pendingDepth: null,
+    showStats: false
+  };
+}
+
+const other = t => (t === "A" ? "B" : "A");
+const nameOf = id => {
+  const team = id[0];
+  return S.roster[team].find(p => p.id === id).name;
+};
+const serverId   = () => S.positions[S.servingTeam][S.serverIdx];
+const receiverId = () => S.positions[other(S.servingTeam)][S.serverIdx];
+const sideName   = idx => (idx === 0 ? "right" : "left");
+
+function gameOver() {
+  const { A, B } = S.score;
+  return Math.max(A, B) >= S.target && Math.abs(A - B) >= S.winBy;
+}
+function winner() {
+  return S.score.A > S.score.B ? "A" : "B";
+}
+
+/* ---------------------------------------------------------------
+   Rally handling
+   --------------------------------------------------------------- */
+
+// Everything that a rally can change. Snapshotted for undo.
+const MUTABLE = ["positions", "score", "servingTeam", "serverNum", "serverIdx", "rallies"];
+
+function snapshot() {
+  const o = {};
+  MUTABLE.forEach(k => { o[k] = JSON.parse(JSON.stringify(S[k])); });
+  return o;
+}
+
+function recordRally(won, depth) {
+  S.history.push(snapshot());
+
+  const weServe = S.servingTeam === S.tracked;
+  S.rallies.push({
+    servingTeam: S.servingTeam,
+    serverId: serverId(),
+    receiverId: receiverId(),
+    serveDepth:  weServe ? depth : null,
+    returnDepth: weServe ? null : depth,
+    winner: won
+  });
+
+  if (won === S.servingTeam) {
+    // Point. Partners switch sides; the same player keeps serving, from the other side.
+    S.score[won]++;
+    S.positions[won].reverse();
+    S.serverIdx = 1 - S.serverIdx;
+  } else if (S.serverNum === 1) {
+    // Serve passes to the partner, who is standing on the other side. No switch, no point.
+    S.serverNum = 2;
+    S.serverIdx = 1 - S.serverIdx;
+  } else {
+    // Side out. The incoming server is on the right when their score is even.
+    const next = other(S.servingTeam);
+    S.servingTeam = next;
+    S.serverNum = 1;
+    S.serverIdx = S.score[next] % 2 === 0 ? 0 : 1;
+  }
+
+  S.pendingDepth = null;
+  render();
+}
+
+function undo() {
+  const prev = S.history.pop();
+  if (!prev) return;
+  MUTABLE.forEach(k => { S[k] = prev[k]; });
+  S.pendingDepth = null;
+  render();
+}
+
+/* ---------------------------------------------------------------
+   Stats
+   --------------------------------------------------------------- */
+
+const emptyBuckets = () => ({
+  deep:  { n: 0, w: 0 },
+  short: { n: 0, w: 0 },
+  other: { n: 0, w: 0 }
+});
+
+function computeStats() {
+  const t = S.tracked;
+  const serving = {}, returning = {};
+  S.roster[t].forEach(p => { serving[p.id] = emptyBuckets(); returning[p.id] = emptyBuckets(); });
+  const teamServe = emptyBuckets(), teamReturn = emptyBuckets();
+
+  for (const r of S.rallies) {
+    const won = r.winner === t;
+    if (r.servingTeam === t && r.serveDepth) {
+      for (const b of [serving[r.serverId][r.serveDepth], teamServe[r.serveDepth]]) {
+        b.n++; if (won) b.w++;
+      }
+    } else if (r.servingTeam !== t && r.returnDepth) {
+      for (const b of [returning[r.receiverId][r.returnDepth], teamReturn[r.returnDepth]]) {
+        b.n++; if (won) b.w++;
+      }
+    }
+  }
+  return { serving, returning, teamServe, teamReturn };
+}
+
+function bucketRow(label, b, dim) {
+  const pct = b.n ? Math.round((b.w / b.n) * 100) : null;
+  const meter = pct === null ? "" :
+    `<span class="meter"><i style="width:${pct}%"></i></span>`;
+  return `<tr${dim ? ' class="dimrow"' : ""}>
+    <td${dim ? ' class="dim"' : ""}>${label}</td>
+    <td>${b.n}</td>
+    <td>${b.w}</td>
+    <td>${b.n - b.w}</td>
+    <td>${pct === null ? "—" : pct + "%"}${meter}</td>
+  </tr>`;
+}
+
+function statsTable(kind, perPlayer, team) {
+  const opts = BUCKETS[kind];
+  const wonLabel = kind === "serve" ? "Pts won" : "Won";
+  const lostLabel = kind === "serve" ? "Pts lost" : "Lost";
+
+  let body = "";
+  for (const p of S.roster[S.tracked]) {
+    body += `<tr class="group"><td colspan="5">${esc(p.name)}</td></tr>`;
+    for (const [key, label] of opts) {
+      body += bucketRow(label, perPlayer[p.id][key], key === "other");
+    }
+  }
+  body += `<tr class="group"><td colspan="5">${esc(S.names[S.tracked])} — total</td></tr>`;
+  for (const [key, label] of opts) {
+    body += bucketRow(label, team[key], key === "other");
+  }
+
+  return `<table>
+    <thead><tr>
+      <th>${kind === "serve" ? "Serve" : "Return"}</th>
+      <th>N</th><th>${wonLabel}</th><th>${lostLabel}</th><th>Win %</th>
+    </tr></thead>
+    <tbody>${body}</tbody>
+  </table>`;
+}
+
+function renderStats() {
+  const st = computeStats();
+  const el = document.getElementById("statsPanel");
+  el.innerHTML = `
+    <div class="card">
+      <h2>Serving — ${esc(S.names[S.tracked])}</h2>
+      ${statsTable("serve", st.serving, st.teamServe)}
+      <p class="hint">You only score while serving, so a won rally here is a point.
+        Faults are counted separately and left out of the deep-vs-short comparison.</p>
+    </div>
+    <div class="card">
+      <h2>Returning — ${esc(S.names[S.tracked])}</h2>
+      ${statsTable("return", st.returning, st.teamReturn)}
+      <p class="hint">Winning a rally on your return earns the serve back — a side out,
+        not a point. "Return out" covers returns you missed or put out. Rallies where
+        their serve went out aren't returns you made, so they only move the score.</p>
+    </div>`;
+}
+
+/* ---------------------------------------------------------------
+   Render
+   --------------------------------------------------------------- */
+
+function lastRallyText() {
+  const r = S.rallies[S.rallies.length - 1];
+  if (!r) return "Log the depth, then who won. Undo is below if you mis-tap.";
+  const lbl = (kind, d) => (BUCKETS[kind].find(b => b[0] === d) || [, d])[1].toLowerCase();
+  let what;
+  if (r.serveDepth)       what = `${nameOf(r.serverId)} — ${lbl("serve", r.serveDepth)} serve`;
+  else if (r.returnDepth) what = `${nameOf(r.receiverId)} — ${lbl("return", r.returnDepth)}`;
+  else                    what = "serve was out";
+  return `Last rally: ${what} → ${S.names[r.winner]}`;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function render() {
+  const over = gameOver();
+  const recv = other(S.servingTeam);
+
+  // score call: serving – receiving – server number
+  document.getElementById("call").textContent =
+    `${S.score[S.servingTeam]} – ${S.score[recv]} – ${S.serverNum}`;
+  document.getElementById("callKey").textContent =
+    `${S.names[S.servingTeam]} serving · ${S.names[recv]} receiving · server ${S.serverNum}`;
+
+  for (const t of ["A", "B"]) {
+    const line = document.getElementById("line" + t);
+    line.className = "teamline" + (t === S.tracked ? " tracked" : "");
+    line.innerHTML =
+      `<span class="who"><span class="chip chip-${t.toLowerCase()}"></span>${esc(S.names[t])}</span>` +
+      `<span class="pts">${S.score[t]}</span>`;
+  }
+
+  document.getElementById("whoServes").innerHTML = over ? "" :
+    `Serving: <strong>${esc(nameOf(serverId()))}</strong> from the ${sideName(S.serverIdx)} court<br>` +
+    `Receiving: <strong>${esc(nameOf(receiverId()))}</strong>`;
+
+  // ---- winner banner ----
+  const banner = document.getElementById("winBanner");
+  banner.classList.toggle("hidden", !over);
+  if (over) {
+    banner.textContent =
+      `${S.names[winner()]} win ${S.score[winner()]}–${S.score[other(winner())]}`;
+  }
+
+  document.getElementById("lastRally").textContent = over ? "" : lastRallyText();
+
+  // ---- step 1: depth ----
+  const depthCard = document.getElementById("depthCard");
+  const winCard = document.getElementById("winCard");
+  depthCard.classList.toggle("hidden", over);
+  winCard.classList.toggle("hidden", over);
+
+  if (!over) {
+    const weServe = S.servingTeam === S.tracked;
+    const kind = weServe ? "serve" : "return";
+    const actor = nameOf(weServe ? serverId() : receiverId());
+    const chosen = S.pendingDepth
+      ? DEPTH_OPTS[kind].find(o => o.id === S.pendingDepth)
+      : null;
+
+    document.getElementById("depthTitle").textContent =
+      `${actor}'s ${weServe ? "serve" : "return"}`;
+    document.getElementById("depthState").textContent =
+      chosen ? "✓ " + chosen.label : "Tap one";
+    document.getElementById("depthHint").textContent = weServe
+      ? "A fault ends the rally on the spot — no need for step 2."
+      : "A missed return, or their serve going out, ends the rally on the spot.";
+
+    const btn = o =>
+      `<button class="opt${o.auto ? " auto" : ""}" data-opt="${o.id}" ` +
+      `aria-pressed="${!o.auto && S.pendingDepth === o.id}">` +
+      `${o.sub ? `<small>${o.sub}</small>` : ""}${o.label}</button>`;
+
+    document.getElementById("depthRow").innerHTML =
+      DEPTH_OPTS[kind].filter(o => !o.auto).map(btn).join("");
+    document.getElementById("autoRow").innerHTML =
+      DEPTH_OPTS[kind].filter(o => o.auto).map(btn).join("");
+
+    document.querySelectorAll("[data-opt]").forEach(el => {
+      const o = DEPTH_OPTS[kind].find(x => x.id === el.dataset.opt);
+      el.onclick = () => {
+        if (o.auto) {
+          // The outcome is implied — record the rally without a step 2.
+          recordRally(o.auto === "us" ? S.tracked : other(S.tracked), o.depth);
+        } else {
+          S.pendingDepth = S.pendingDepth === o.id ? null : o.id;
+          render();
+        }
+      };
     });
 
-    resetBtn.addEventListener('click', () => {
-      count = 0;
-      countEl.textContent = count;
-    });
-  </script>
+    // ---- step 2: who won ----
+    const ready = chosen !== null;
+    for (const t of ["A", "B"]) {
+      const b = document.getElementById("won" + t);
+      const role = t === S.servingTeam ? "Point for" : "Side out to";
+      b.innerHTML = `<small>${role}</small>${esc(S.names[t])}`;
+      b.disabled = !ready;
+    }
+    document.getElementById("winState").textContent = ready ? "Tap one" : "Waiting";
+    document.getElementById("winHint").textContent = ready
+      ? "" : "Log the depth above first.";
+
+    depthCard.classList.toggle("active", !ready);
+    depthCard.classList.toggle("done", ready);
+    depthCard.classList.remove("idle");
+    winCard.classList.toggle("active", ready);
+    winCard.classList.toggle("idle", !ready);
+  }
+
+  document.getElementById("undoBtn").disabled = S.history.length === 0;
+
+  const statsBtn = document.getElementById("statsBtn");
+  statsBtn.textContent = S.showStats ? "Hide stats" : "Show stats";
+  document.getElementById("statsPanel").classList.toggle("hidden", !S.showStats);
+  if (S.showStats) renderStats();
+}
+
+/* ---------------------------------------------------------------
+   Setup wiring
+   --------------------------------------------------------------- */
+
+const $ = id => document.getElementById(id);
+const NAME_FIELDS = ["a0", "a1", "b0", "b1"];
+
+function syncTeamLabels() {
+  const a = $("aName").value.trim() || "Team 1";
+  const b = $("bName").value.trim() || "Team 2";
+  $("trackSel").options[0].text = a;
+  $("trackSel").options[1].text = b;
+  $("serveSel").options[0].text = a;
+  $("serveSel").options[1].text = b;
+}
+
+function validateSetup() {
+  $("startBtn").disabled = !NAME_FIELDS.every(id => $(id).value.trim().length > 0);
+}
+
+NAME_FIELDS.forEach(id => $(id).addEventListener("input", validateSetup));
+["aName", "bName"].forEach(id => $(id).addEventListener("input", syncTeamLabels));
+
+$("startBtn").onclick = () => {
+  S = newState({
+    names: {
+      A: $("aName").value.trim() || "Team 1",
+      B: $("bName").value.trim() || "Team 2"
+    },
+    roster: {
+      A: [{ id: "A0", name: $("a0").value.trim() }, { id: "A1", name: $("a1").value.trim() }],
+      B: [{ id: "B0", name: $("b0").value.trim() }, { id: "B1", name: $("b1").value.trim() }]
+    },
+    tracked: $("trackSel").value,
+    first: $("serveSel").value,
+    target: parseInt($("targetSel").value, 10)
+  });
+  $("setup").classList.add("hidden");
+  $("game").classList.remove("hidden");
+  render();
+};
+
+$("wonA").onclick = () => recordRally("A", S.pendingDepth);
+$("wonB").onclick = () => recordRally("B", S.pendingDepth);
+$("undoBtn").onclick = undo;
+$("statsBtn").onclick = () => { S.showStats = !S.showStats; render(); };
+$("newBtn").onclick = () => {
+  if (S.rallies.length && !confirm("Start a new game? This game's stats will be lost.")) return;
+  S = null;
+  $("game").classList.add("hidden");
+  $("setup").classList.remove("hidden");
+  window.scrollTo(0, 0);
+};
+
+syncTeamLabels();
+validateSetup();
+
+/*
+  Palette check — Node isn't installed here, so the dataviz validator was never run
+  against this surface. To verify in the browser, drop the skill's validator in as a
+  module and give <body> a data-palette attribute:
+
+    <body data-palette="#3987e5,#d95926">
+    <script type="module" src="path/to/dataviz/scripts/validate_palette.js"><\/script>
+
+  It reads data-palette off <body> and logs a console.table report. Surface here is
+  #1a1a19, which is the surface the reference palette's dark steps were validated for.
+*/
+</script>
 </body>
 </html>

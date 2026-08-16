@@ -75,30 +75,31 @@
   .chip-a { background: var(--series-1); }
   .chip-b { background: var(--series-2); }
 
-  /* ---- hero score call ---- */
-  .call {
-    text-align: center;
-    font-size: 56px;
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -1px;
-    margin: 4px 0 2px;
-  }
-  .call-key { text-align: center; font-size: 11px; letter-spacing: 1.5px;
-              text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+  /* ---- scoreboard: your team is ALWAYS on the left, so your number
+         never moves between rallies ---- */
+  .scoreboard { display: flex; align-items: flex-start; gap: 10px; }
+  .sb-team { flex: 1; text-align: center; }
+  .sb-name { font-size: 12px; font-weight: 600; color: var(--text-secondary);
+             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-pts { font-size: 52px; font-weight: 700; line-height: 1.05; margin-top: 2px;
+            font-variant-numeric: tabular-nums; }
+  .sb-tag { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--text-muted); min-height: 13px; }
+  .sb-sep { font-size: 26px; color: var(--baseline); padding-top: 26px; }
 
-  .teamline { display: flex; justify-content: space-between; align-items: center;
-              padding: 7px 0; border-top: 1px solid var(--gridline); font-size: 15px; }
-  .teamline .pts { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .teamline.tracked .who::after {
-    content: "tracked"; margin-left: 8px; font-size: 10px; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--text-muted);
-    border: 1px solid var(--baseline); border-radius: 4px; padding: 1px 5px;
-  }
+  .callout { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+  .callout b { color: var(--text-secondary); font-weight: 600;
+               font-variant-numeric: tabular-nums; letter-spacing: 1.5px; }
 
-  .who-serves { font-size: 14px; color: var(--text-secondary); line-height: 1.7;
-                margin-top: 14px; }
-  .who-serves strong { color: var(--text-primary); font-weight: 600; }
+  /* ---- who's serving ---- */
+  .serving { border-top: 1px solid var(--gridline); margin-top: 14px;
+             padding-top: 14px; text-align: center; }
+  .srv-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+             margin-right: 8px; vertical-align: middle; }
+  .srv-name { font-size: 20px; font-weight: 700; }
+  .srv-detail { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+  .srv-detail b { color: var(--text-primary); font-weight: 600; }
+  .srv-note { font-size: 11px; color: var(--text-muted); margin-top: 7px; }
 
   /* ---- buttons ---- */
   .btnrow { display: flex; gap: 8px; }
@@ -253,11 +254,9 @@
     <div id="winBanner" class="banner hidden"></div>
 
     <div class="card">
-      <div class="call" id="call">0 – 0 – 2</div>
-      <div class="call-key" id="callKey">serving · receiving · server</div>
-      <div class="teamline" id="lineA"></div>
-      <div class="teamline" id="lineB"></div>
-      <div class="who-serves" id="whoServes"></div>
+      <div class="scoreboard" id="scoreboard"></div>
+      <div class="callout" id="callout"></div>
+      <div class="serving" id="serving"></div>
     </div>
 
     <p class="last" id="lastRally"></p>
@@ -538,23 +537,43 @@ function render() {
   const over = gameOver();
   const recv = other(S.servingTeam);
 
-  // score call: serving – receiving – server number
-  document.getElementById("call").textContent =
-    `${S.score[S.servingTeam]} – ${S.score[recv]} – ${S.serverNum}`;
-  document.getElementById("callKey").textContent =
-    `${S.names[S.servingTeam]} serving · ${S.names[recv]} receiving · server ${S.serverNum}`;
+  // ---- scoreboard: tracked team first, so your number never moves ----
+  const cell = t =>
+    `<div class="sb-team">
+       <div class="sb-name"><span class="chip chip-${t.toLowerCase()}"></span>${esc(S.names[t])}</div>
+       <div class="sb-pts">${S.score[t]}</div>
+       <div class="sb-tag">${t === S.tracked ? "you" : ""}</div>
+     </div>`;
+  document.getElementById("scoreboard").innerHTML =
+    cell(S.tracked) + `<div class="sb-sep">–</div>` + cell(other(S.tracked));
 
-  for (const t of ["A", "B"]) {
-    const line = document.getElementById("line" + t);
-    line.className = "teamline" + (t === S.tracked ? " tracked" : "");
-    line.innerHTML =
-      `<span class="who"><span class="chip chip-${t.toLowerCase()}"></span>${esc(S.names[t])}</span>` +
-      `<span class="pts">${S.score[t]}</span>`;
+  // The spoken call is only needed when it's your serve, and it's the thing
+  // that reorders — so show it only then, clearly labelled as the call.
+  const weServe = S.servingTeam === S.tracked;
+  document.getElementById("callout").innerHTML = (over || !weServe) ? "" :
+    `call it &nbsp;<b>${S.score[S.servingTeam]} – ${S.score[recv]} – ${S.serverNum}</b>`;
+
+  // ---- who's serving ----
+  const srv = document.getElementById("serving");
+  if (over) {
+    srv.innerHTML = "";
+  } else {
+    const partner = S.roster[S.servingTeam].find(p => p.id !== serverId()).name;
+    const nth = S.serverNum === 1 ? "1st" : "2nd";
+    const note = weServe
+      ? (S.serverNum === 1
+          ? `Your ${nth} server — a fault passes the serve to ${esc(partner)}`
+          : `Your ${nth} server — a fault gives the serve away`)
+      : `Their ${nth} server`;
+    srv.innerHTML =
+      `<div class="srv-name">
+         <span class="srv-dot" style="background:var(--series-${S.servingTeam === "A" ? 1 : 2})"></span>
+         ${esc(nameOf(serverId()))} serves
+       </div>
+       <div class="srv-detail">from the <b>${sideName(S.serverIdx)}</b> court
+         &nbsp;→&nbsp; <b>${esc(nameOf(receiverId()))}</b></div>
+       <div class="srv-note">${note}</div>`;
   }
-
-  document.getElementById("whoServes").innerHTML = over ? "" :
-    `Serving: <strong>${esc(nameOf(serverId()))}</strong> from the ${sideName(S.serverIdx)} court<br>` +
-    `Receiving: <strong>${esc(nameOf(receiverId()))}</strong>`;
 
   // ---- winner banner ----
   const banner = document.getElementById("winBanner");

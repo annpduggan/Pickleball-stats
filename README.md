@@ -38,6 +38,34 @@ necessarily serve from the side matching the score.** Score parity fixes the sid
 first server of a side-out. Server 2 serves from wherever they happen to be standing, so with an
 odd score you'll often see server 2 on the right. That's correct.
 
+## The top panel
+
+Score on top, who's serving underneath. Deliberately compact, so the score, the serve, and both
+sets of rally buttons all fit on one phone screen without scrolling.
+
+```
+   ■ Reds          ■ Blues
+       4               2
+      you
+
+   ─────────────────────────
+   ● Ann serves
+   from the right → Cy
+   Your 2nd server — a fault
+   gives the serve away
+```
+
+**Your team is always on the left**, whoever is serving, and is marked "you". This matters: the
+traditional score *call* is serving-team-first, so it reorders every side out and your own number
+jumps between slots. The scoreboard stays put so you can find your score without reading it.
+
+The spoken call (`4 – 2 – 2`) still appears — but only when **you're** serving, labelled "call it",
+since that's the one moment you need to say it out loud. It's hidden while you're receiving.
+
+The line underneath names the server, the court they're serving from, and the diagonal receiver.
+Under that, a reminder of whether you're on your 1st or 2nd server and what a fault would cost —
+because that's the difference between losing the serve and just handing it to your partner.
+
 ## Logging a rally
 
 Each rally is two steps, numbered on screen. The active step is highlighted and the other is

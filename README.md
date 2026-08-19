@@ -44,27 +44,37 @@ Score on top, who's serving underneath. Deliberately compact, so the score, the 
 sets of rally buttons all fit on one phone screen without scrolling.
 
 ```
-   ■ Reds          ■ Blues
-       4               2
-      you
-
+    Reds  YOU          Blues
+      4                  2
+     ● ●                ○ ○
    ─────────────────────────
-   ● Ann serves
-   from the right → Cy
-   Your 2nd server — a fault
-   gives the serve away
+   Ann serves from the right → Cy   ⓘ
 ```
 
 **Your team is always on the left**, whoever is serving, and is marked "you". This matters: the
 traditional score *call* is serving-team-first, so it reorders every side out and your own number
 jumps between slots. The scoreboard stays put so you can find your score without reading it.
 
-The spoken call (`4 – 2 – 2`) still appears — but only when **you're** serving, labelled "call it",
-since that's the one moment you need to say it out loud. It's hidden while you're receiving.
+Each team's name carries its own colour — Team 1 blue, Team 2 orange — the same two colours as the
+rally buttons, so the name alone tells you which side of the app a team owns.
 
-The line underneath names the server, the court they're serving from, and the diagonal receiver.
-Under that, a reminder of whether you're on your 1st or 2nd server and what a fault would cost —
-because that's the difference between losing the serve and just handing it to your partner.
+**The two circles under each score are the server number.** Both outlined means that team isn't
+serving. One filled means their 1st server is in; both filled means their 2nd. The opening 0-0-2
+therefore shows as two filled circles, and at any point in the game you can see at a glance
+whether a fault costs you the serve or merely hands it to your partner.
+
+One line underneath names the server, the court they're serving from, and the diagonal receiver.
+
+The spoken call isn't displayed. The scoreboard has both numbers and the circles have the third,
+so it was one more thing to read for information already on screen.
+
+### Info icons
+
+Every explanatory paragraph sits behind an **ⓘ** — what a fault costs from here, what each step
+does, how to read the stats tables. They're collapsed by default, which is what buys the room for
+the whole game to fit above the fold. Opening one sticks until you close it, and the text is
+written for the current state: it names the partner who'd inherit the serve rather than talking
+about "your partner" in the abstract.
 
 ## Logging a rally
 
@@ -73,7 +83,9 @@ dimmed, so it's always obvious what to tap next.
 
 **Step 1 — depth.** Deep or Short, attributed to whoever is serving or returning for your team.
 
-**Step 2 — who won the rally.** Unlocks once step 1 is logged.
+**Step 2 — who won the rally.** Unlocks once step 1 is logged. Two buttons, just the team names —
+tap whoever won the rally. What that does to the score depends on who was serving and on which
+server, and the app works it out; the ⓘ spells it out for the current rally if you want it.
 
 ### Buttons that skip step 2
 
@@ -120,5 +132,6 @@ Each section lists one block per tracked player plus a team total.
 
 ## Layout note
 
-The game screen scrolls; it isn't pinned to a single viewport. The score call, depth buttons, and
-rally buttons all fit above the fold on a phone — the stats panel is below, behind a toggle.
+The game screen scrolls, but it shouldn't need to: the scoreboard, the serving line, and both sets
+of rally buttons fit above the fold on a phone with the info text collapsed. The stats panel is
+below, behind a toggle.

@@ -40,15 +40,15 @@
   .wrap {
     max-width: 560px;
     margin: 0 auto;
-    padding: 16px 16px 40px;
+    padding: 12px 16px 40px;
   }
 
   .card {
     background: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
   }
 
   h1 { font-size: 19px; font-weight: 600; margin: 4px 0 16px; }
@@ -76,30 +76,36 @@
   .chip-b { background: var(--series-2); }
 
   /* ---- scoreboard: your team is ALWAYS on the left, so your number
-         never moves between rallies ---- */
-  .scoreboard { display: flex; align-items: flex-start; gap: 10px; }
+         never moves between rallies. Each team's name carries its own
+         colour, which is what the chips used to do. ---- */
+  .scoreboard { display: flex; align-items: flex-start; gap: 8px; }
   .sb-team { flex: 1; text-align: center; }
-  .sb-name { font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  .sb-team.t-a { --team: var(--series-1); }
+  .sb-team.t-b { --team: var(--series-2); }
+  .sb-name { font-size: 13px; font-weight: 600; color: var(--team);
              white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sb-pts { font-size: 52px; font-weight: 700; line-height: 1.05; margin-top: 2px;
+  .sb-you { font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+            text-transform: uppercase; color: var(--text-muted); }
+  .sb-pts { font-size: 40px; font-weight: 700; line-height: 1; margin-top: 1px;
             font-variant-numeric: tabular-nums; }
-  .sb-tag { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
-            color: var(--text-muted); min-height: 13px; }
-  .sb-sep { font-size: 26px; color: var(--baseline); padding-top: 26px; }
+  .sb-sep { font-size: 22px; color: var(--baseline); padding-top: 25px; }
 
-  .callout { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
-  .callout b { color: var(--text-secondary); font-weight: 600;
-               font-variant-numeric: tabular-nums; letter-spacing: 1.5px; }
+  /* Two pips under each score: both outlined = not serving, one filled = 1st
+     server, two filled = 2nd server. Also makes the 0-0-2 opener visible. */
+  .sb-pips { display: flex; justify-content: center; gap: 5px; margin-top: 7px; }
+  .pip { width: 9px; height: 9px; border-radius: 50%;
+         border: 1.5px solid var(--team); opacity: 0.4; }
+  .pip.on { background: var(--team); opacity: 1; }
 
-  /* ---- who's serving ---- */
-  .serving { border-top: 1px solid var(--gridline); margin-top: 14px;
-             padding-top: 14px; text-align: center; }
-  .srv-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
-             margin-right: 8px; vertical-align: middle; }
-  .srv-name { font-size: 20px; font-weight: 700; }
-  .srv-detail { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
-  .srv-detail b { color: var(--text-primary); font-weight: 600; }
-  .srv-note { font-size: 11px; color: var(--text-muted); margin-top: 7px; }
+  /* ---- who's serving: one line, name → side → receiver ---- */
+  .serving { border-top: 1px solid var(--gridline); margin-top: 12px;
+             padding-top: 12px; text-align: center; font-size: 15px;
+             color: var(--text-secondary); line-height: 1.45; }
+  .serving b { color: var(--text-primary); font-weight: 600; }
+  .serving .who { color: var(--team); font-weight: 700; }
+  .serving.t-a { --team: var(--series-1); }
+  .serving.t-b { --team: var(--series-2); }
+  .serving .info { margin-left: 8px; vertical-align: middle; }
 
   /* ---- buttons ---- */
   .btnrow { display: flex; gap: 8px; }
@@ -150,6 +156,14 @@
 
   .hint { font-size: 12px; color: var(--text-muted); margin: 10px 0 0; line-height: 1.5; }
 
+  /* ---- info icon: the explanatory text is collapsed by default, so the
+         scoreboard and both sets of rally buttons fit one phone screen ---- */
+  .info { flex: none; width: 21px; height: 21px; border-radius: 50%;
+          border: 1px solid var(--baseline); background: none;
+          color: var(--text-muted); font-family: inherit; font-size: 12px;
+          font-weight: 700; font-style: italic; line-height: 1; padding: 0; }
+  .info[aria-expanded="true"] { border-color: var(--series-1); color: var(--series-1); }
+
   /* ---- two-step flow ---- */
   .step-card { transition: opacity .15s ease, border-color .15s ease; }
   .step-card.idle { opacity: 0.5; }
@@ -158,6 +172,7 @@
   .step-head { display: flex; align-items: center; justify-content: space-between;
                gap: 10px; margin-bottom: 12px; }
   .step-head h2 { margin: 0; display: flex; align-items: center; }
+  .step-meta { display: flex; align-items: center; gap: 8px; flex: none; }
   .stepnum { display: inline-flex; align-items: center; justify-content: center;
              width: 20px; height: 20px; border-radius: 50%; flex: none;
              background: var(--baseline); color: var(--text-secondary);
@@ -169,15 +184,13 @@
   .step-card.done .step-state { color: var(--good); }
 
   .autorow { margin-top: 8px; }
-  .opt small, .rally small { display: block; font-size: 10px; font-weight: 600;
-                             letter-spacing: 1px; text-transform: uppercase;
-                             margin-bottom: 4px; }
-  .opt small { color: var(--text-muted); }
-  .rally small { opacity: 0.85; }
+  .opt small { display: block; font-size: 10px; font-weight: 600;
+               letter-spacing: 1px; text-transform: uppercase;
+               margin-bottom: 4px; color: var(--text-muted); }
   .opt.auto { font-size: 14px; padding: 12px 4px; }
 
   .last { font-size: 12px; color: var(--text-muted); text-align: center;
-          margin: 0 0 12px; min-height: 15px; line-height: 1.3; }
+          margin: 0 0 10px; min-height: 15px; line-height: 1.3; }
 
   .banner { text-align: center; padding: 14px; border-radius: 10px;
             border: 1px solid var(--good); color: var(--text-primary);
@@ -255,8 +268,8 @@
 
     <div class="card">
       <div class="scoreboard" id="scoreboard"></div>
-      <div class="callout" id="callout"></div>
       <div class="serving" id="serving"></div>
+      <p class="hint hidden" id="serveHint"></p>
     </div>
 
     <p class="last" id="lastRally"></p>
@@ -264,23 +277,31 @@
     <div class="card step-card" id="depthCard">
       <div class="step-head">
         <h2><span class="stepnum">1</span><span id="depthTitle">Your serve</span></h2>
-        <span class="step-state" id="depthState">Tap one</span>
+        <span class="step-meta">
+          <span class="step-state" id="depthState">Tap one</span>
+          <button class="info" data-info="depth" aria-expanded="false"
+                  aria-label="About this step">i</button>
+        </span>
       </div>
       <div class="btnrow" id="depthRow"></div>
       <div class="btnrow autorow" id="autoRow"></div>
-      <p class="hint" id="depthHint"></p>
+      <p class="hint hidden" id="depthHint"></p>
     </div>
 
     <div class="card step-card" id="winCard">
       <div class="step-head">
         <h2><span class="stepnum">2</span>Who won the rally?</h2>
-        <span class="step-state" id="winState">Waiting</span>
+        <span class="step-meta">
+          <span class="step-state" id="winState">Waiting</span>
+          <button class="info" data-info="win" aria-expanded="false"
+                  aria-label="About this step">i</button>
+        </span>
       </div>
       <div class="btnrow">
         <button class="rally rally-a" id="wonA" disabled></button>
         <button class="rally rally-b" id="wonB" disabled></button>
       </div>
-      <p class="hint" id="winHint"></p>
+      <p class="hint hidden" id="winHint"></p>
     </div>
 
     <div class="btnrow" style="margin-bottom:12px">
@@ -497,19 +518,26 @@ function statsTable(kind, perPlayer, team) {
 function renderStats() {
   const st = computeStats();
   const el = document.getElementById("statsPanel");
+  const hint = (key, text) =>
+    `<p class="hint${INFO_OPEN[key] ? "" : " hidden"}">${text}</p>`;
+
   el.innerHTML = `
     <div class="card">
-      <h2>Serving — ${esc(S.names[S.tracked])}</h2>
+      <div class="step-head">
+        <h2>Serving — ${esc(S.names[S.tracked])}</h2>${infoBtn("statsServe")}
+      </div>
       ${statsTable("serve", st.serving, st.teamServe)}
-      <p class="hint">You only score while serving, so a won rally here is a point.
-        Faults are counted separately and left out of the deep-vs-short comparison.</p>
+      ${hint("statsServe", `You only score while serving, so a won rally here is a point.
+        Faults are counted separately and left out of the deep-vs-short comparison.`)}
     </div>
     <div class="card">
-      <h2>Returning — ${esc(S.names[S.tracked])}</h2>
+      <div class="step-head">
+        <h2>Returning — ${esc(S.names[S.tracked])}</h2>${infoBtn("statsReturn")}
+      </div>
       ${statsTable("return", st.returning, st.teamReturn)}
-      <p class="hint">Winning a rally on your return earns the serve back — a side out,
+      ${hint("statsReturn", `Winning a rally on your return earns the serve back — a side out,
         not a point. "Return out" covers returns you missed or put out. Rallies where
-        their serve went out aren't returns you made, so they only move the score.</p>
+        their serve went out aren't returns you made, so they only move the score.`)}
     </div>`;
 }
 
@@ -533,46 +561,75 @@ function esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+/*
+  Which info popovers are open. Deliberately outside S: it's screen chrome, not
+  game state, so undo doesn't touch it and it survives a new game.
+*/
+const INFO_OPEN = {};
+
+const infoBtn = key =>
+  `<button class="info" data-info="${key}" aria-expanded="${!!INFO_OPEN[key]}" ` +
+  `aria-label="What does this mean?">i</button>`;
+
+// Point an info button at the paragraph it reveals, and show or hide it.
+function applyInfo(key, el, text) {
+  const open = !!INFO_OPEN[key];
+  el.textContent = text;
+  el.classList.toggle("hidden", !open);
+  const btn = document.querySelector(`[data-info="${key}"]`);
+  if (btn) btn.setAttribute("aria-expanded", String(open));
+}
+
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-info]");
+  if (!btn || !S) return;
+  const key = btn.dataset.info;
+  INFO_OPEN[key] = !INFO_OPEN[key];
+  render();
+});
+
 function render() {
   const over = gameOver();
-  const recv = other(S.servingTeam);
 
   // ---- scoreboard: tracked team first, so your number never moves ----
-  const cell = t =>
-    `<div class="sb-team">
-       <div class="sb-name"><span class="chip chip-${t.toLowerCase()}"></span>${esc(S.names[t])}</div>
+  // Two pips per team carry the server number: outlined for whoever isn't
+  // serving, one filled for the 1st server, both filled for the 2nd.
+  const cell = t => {
+    const isServing = !over && t === S.servingTeam;
+    const pip = n => `<span class="pip${isServing && S.serverNum >= n ? " on" : ""}"></span>`;
+    return `<div class="sb-team t-${t.toLowerCase()}">
+       <div class="sb-name">${esc(S.names[t])}${
+         t === S.tracked ? ' <span class="sb-you">you</span>' : ""}</div>
        <div class="sb-pts">${S.score[t]}</div>
-       <div class="sb-tag">${t === S.tracked ? "you" : ""}</div>
+       <div class="sb-pips">${pip(1)}${pip(2)}</div>
      </div>`;
+  };
   document.getElementById("scoreboard").innerHTML =
     cell(S.tracked) + `<div class="sb-sep">–</div>` + cell(other(S.tracked));
 
-  // The spoken call is only needed when it's your serve, and it's the thing
-  // that reorders — so show it only then, clearly labelled as the call.
+  // ---- who's serving: one line — server, side, receiver ----
   const weServe = S.servingTeam === S.tracked;
-  document.getElementById("callout").innerHTML = (over || !weServe) ? "" :
-    `call it &nbsp;<b>${S.score[S.servingTeam]} – ${S.score[recv]} – ${S.serverNum}</b>`;
-
-  // ---- who's serving ----
   const srv = document.getElementById("serving");
+  const srvHint = document.getElementById("serveHint");
   if (over) {
     srv.innerHTML = "";
+    srvHint.classList.add("hidden");
   } else {
     const partner = S.roster[S.servingTeam].find(p => p.id !== serverId()).name;
     const nth = S.serverNum === 1 ? "1st" : "2nd";
-    const note = weServe
-      ? (S.serverNum === 1
-          ? `Your ${nth} server — a fault passes the serve to ${esc(partner)}`
-          : `Your ${nth} server — a fault gives the serve away`)
-      : `Their ${nth} server`;
+    srv.className = "serving t-" + S.servingTeam.toLowerCase();
     srv.innerHTML =
-      `<div class="srv-name">
-         <span class="srv-dot" style="background:var(--series-${S.servingTeam === "A" ? 1 : 2})"></span>
-         ${esc(nameOf(serverId()))} serves
-       </div>
-       <div class="srv-detail">from the <b>${sideName(S.serverIdx)}</b> court
-         &nbsp;→&nbsp; <b>${esc(nameOf(receiverId()))}</b></div>
-       <div class="srv-note">${note}</div>`;
+      `<span class="who">${esc(nameOf(serverId()))}</span> serves from the ` +
+      `<b>${sideName(S.serverIdx)}</b> &nbsp;→&nbsp; ` +
+      `<b>${esc(nameOf(receiverId()))}</b>` + infoBtn("serve");
+    applyInfo("serve", srvHint,
+      (weServe
+        ? (S.serverNum === 1
+            ? `Your 1st server. A fault passes the serve to ${partner} — it isn't a side out.`
+            : `Your 2nd server. A fault is a side out and gives the serve away.`)
+        : `Their ${nth} server.`) +
+      " The two circles under each score are the server number: one filled for the" +
+      " 1st server, both for the 2nd.");
   }
 
   // ---- winner banner ----
@@ -592,7 +649,6 @@ function render() {
   winCard.classList.toggle("hidden", over);
 
   if (!over) {
-    const weServe = S.servingTeam === S.tracked;
     const kind = weServe ? "serve" : "return";
     const actor = nameOf(weServe ? serverId() : receiverId());
     const chosen = S.pendingDepth
@@ -603,9 +659,11 @@ function render() {
       `${actor}'s ${weServe ? "serve" : "return"}`;
     document.getElementById("depthState").textContent =
       chosen ? "✓ " + chosen.label : "Tap one";
-    document.getElementById("depthHint").textContent = weServe
-      ? "A fault ends the rally on the spot — no need for step 2."
-      : "A missed return, or their serve going out, ends the rally on the spot.";
+    applyInfo("depth", document.getElementById("depthHint"), weServe
+      ? "Deep and Short don't decide the rally, so you pick the winner in step 2."
+      + " A fault ends it on the spot."
+      : "Deep and Short don't decide the rally, so you pick the winner in step 2."
+      + " A missed return, or their serve going out, ends it on the spot.");
 
     const btn = o =>
       `<button class="opt${o.auto ? " auto" : ""}" data-opt="${o.id}" ` +
@@ -631,16 +689,25 @@ function render() {
     });
 
     // ---- step 2: who won ----
+    // Just the team names. The old "Side out to" label was wrong against a 1st
+    // server — losing that rally passes the serve to the partner — so the real
+    // consequence lives in the info text, where there's room to say it.
     const ready = chosen !== null;
     for (const t of ["A", "B"]) {
       const b = document.getElementById("won" + t);
-      const role = t === S.servingTeam ? "Point for" : "Side out to";
-      b.innerHTML = `<small>${role}</small>${esc(S.names[t])}`;
+      b.textContent = S.names[t];
       b.disabled = !ready;
     }
     document.getElementById("winState").textContent = ready ? "Tap one" : "Waiting";
-    document.getElementById("winHint").textContent = ready
-      ? "" : "Log the depth above first.";
+
+    const srvTeam = S.names[S.servingTeam];
+    const recvTeam = S.names[other(S.servingTeam)];
+    const srvPartner = S.roster[S.servingTeam].find(p => p.id !== serverId()).name;
+    applyInfo("win", document.getElementById("winHint"),
+      `${srvTeam} are serving, so only they can score. If ${recvTeam} win the rally, ` +
+      (S.serverNum === 1
+        ? `there's no point and no side out — the serve passes to ${srvPartner}.`
+        : `it's a side out: no point, and the serve goes over.`));
 
     depthCard.classList.toggle("active", !ready);
     depthCard.classList.toggle("done", ready);
